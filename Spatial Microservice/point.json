@@ -1,0 +1,8 @@
+{
+    "source_crs": "EPSG:4283",
+    "target_crs": "EPSG:7844",
+    "geojson": {
+        "type": "Point",
+        "coordinates": [151.2093, -33.8688]
+    }
+}

@@ -1,0 +1,2 @@
+curl.exe -X POST "http://localhost:8000/transform" -H "Content-Type: application/json" -d "@point.json"
+curl.exe -X POST "http://localhost:8000/transform" -H "Content-Type: application/json" -d "@missing.json"
