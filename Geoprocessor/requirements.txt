@@ -1,0 +1,8 @@
+# gdal is installed via apt (python3-gdal) in the Docker image and in WSL.
+# Do NOT pip install gdal — the apt version is pre-compiled and version-matched
+# to the native GDAL libs. pip's version will conflict.
+#
+# Add pip-installable deps below as later phases need them.
+
+numpy
+pytest
