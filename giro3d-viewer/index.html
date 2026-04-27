@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Giro3D — COPC Viewer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --border:  #30363d;
+      --accent:  #58a6ff;
+      --green:   #3fb950;
+      --muted:   #8b949e;
+      --text:    #e6edf3;
+      --danger:  #f85149;
+      --mono:    "JetBrains Mono", monospace;
+    }
+
+    html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; font-size: 13px; }
+
+    #view { position: absolute; inset: 0; }
+
+    /* ── Panel ── */
+    #panel {
+      position: absolute; top: 0; right: 0;
+      width: 16rem; height: 100%;
+      background: rgba(13,17,23,0.93);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      backdrop-filter: blur(8px);
+      overflow-y: auto; z-index: 10;
+    }
+
+    .panel-header { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    .panel-header h1 { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+    .panel-header p  { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    .section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .section-label { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+    /* stats */
+    #info-panel { display: none; }
+    .stat-row { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .stat-label { color: var(--muted); }
+    .stat-value { font-family: var(--mono); color: var(--green); }
+
+    /* toggle */
+    .control-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .toggle { position: relative; width: 32px; height: 18px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 18px; cursor: pointer; transition: background .2s; }
+    .toggle-track::after { content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; background: var(--muted); border-radius: 50%; transition: transform .2s, background .2s; }
+    .toggle input:checked ~ .toggle-track { background: #1f4068; }
+    .toggle input:checked ~ .toggle-track::after { transform: translateX(14px); background: var(--accent); }
+
+    /* slider */
+    .slider-row { margin-bottom: 10px; }
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 11px; color: var(--muted); }
+    .slider-header b { font-family: var(--mono); color: var(--text); }
+    input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+    /* select */
+    .select-label { font-size: 11px; color: var(--muted); margin-bottom: 3px; display: block; }
+    select { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--text); padding: 4px 8px; font-family: var(--mono); font-size: 11px; cursor: pointer; margin-bottom: 8px; }
+
+    /* progress */
+    #progress-wrap { padding: 12px 16px; border-bottom: 1px solid var(--border); display: none; }
+    #progress-track { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; margin-top: 6px; }
+    #progress-bar { height: 100%; width: 0%; background: var(--accent); transition: width .1s; }
+
+    /* error */
+    #error-box { display: none; margin: 12px 16px; padding: 10px; background: #2d1117; border: 1px solid var(--danger); border-radius: 4px; font-family: var(--mono); font-size: 11px; color: var(--danger); word-break: break-all; }
+
+    /* status bar */
+    #status-bar { margin-top: auto; padding: 8px 16px; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+    #status-text { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+    /* classification filters */
+    .class-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .class-absent {
+      opacity: 0.3;
+      pointer-events: none;
+    }
+
+    .class-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--text);
+      width: 100%;
+    }
+
+    .class-label input {
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .class-code {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      width: 16px;
+      flex-shrink: 0;
+    }
+
+    .class-name {
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="view"></div>
+
+  <div id="panel">
+    <div class="panel-header">
+      <h1>Giro3D Viewer</h1>
+      <p> EPSG:6343 (NAD83(2011) / UTM zone 14N — Texas)</p>
+    </div>
+
+    <div id="progress-wrap">
+      <div style="font-family:monospace;font-size:10px;color:var(--muted)" id="status-text-loading">Loading…</div>
+      <div id="progress-track"><div id="progress-bar"></div></div>
+    </div>
+
+    <div id="error-box"></div>
+
+    <div class="section" id="info-panel">
+      <div class="section-label">Dataset</div>
+      <div class="stat-row"><span class="stat-label">Total points</span><span class="stat-value" id="point-count">—</span></div>
+      <div class="stat-row"><span class="stat-label">Displayed</span><span class="stat-value" id="displayed-count">—</span></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Rendering</div>
+      <div class="control-row">
+        <span>Eye Dome Lighting</span>
+        <label class="toggle"><input type="checkbox" id="edl-toggle" checked /><span class="toggle-track"></span></label>
+      </div>
+      <div class="control-row">
+        <span>Inpainting</span>
+        <label class="toggle"><input type="checkbox" id="inpaint-toggle" /><span class="toggle-track"></span></label>
+      </div>
+      <div class="slider-row">
+        <div class="slider-header"><span>Point size</span><b id="point-size-label">auto</b></div>
+        <input type="range" id="point-size" min="0" max="20" step="1" value="0" />
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Filters</div>
+      <div id="classification-list"></div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Colouring</div>
+      <label class="select-label">Attribute</label>
+      <select id="attribute-select"></select>
+      <label class="select-label">Colour ramp</label>
+      <select id="ramp-select">
+        <option value="bathymetry" selected>Bathymetry</option>
+        <option value="viridis">Viridis</option>
+        <option value="jet">Jet</option>
+        <option value="magma">Magma</option>
+        <option value="greys">Greys</option>
+      </select>
+    </div>
+
+    <div style="padding: 8px 16px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); line-height: 1.5;">
+      Point cloud data: U.S. Geological Survey,<br/>
+      National Geospatial Program (3DEP).<br/>
+      Viewer: <a href="https://giro3d.org" style="color:var(--muted)">Giro3D</a> · 
+      <a href="https://github.com/ucpasas/geospatial-vision" style="color:var(--muted)">Source</a>
+    </div>
+
+    <div id="status-bar">
+      <div class="dot"></div>
+      <span id="status-text">Loading…</span>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "@giro3d/giro3d": "^2.0.2",
+    "colormap": "^2.3.2"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  }
+}

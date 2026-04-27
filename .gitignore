@@ -1,0 +1,15 @@
+# Python environments
+.venv/
+.venv-lidar/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Large source data
+*.laz
+
+# Conda installer
+Miniconda3-*.sh

@@ -1,0 +1,12 @@
+# Pipeline outputs — large binaries, never commit
+output/*.tif
+output/*.laz
+output/*.copc.laz
+output/logs/
+
+# Keep the output directory itself
+!output/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc

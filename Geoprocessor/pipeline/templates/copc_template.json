@@ -1,0 +1,12 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.las",
+            "filename": ""
+        },
+        {
+            "type": "writers.copc",
+            "filename": ""
+        }
+    ]
+}

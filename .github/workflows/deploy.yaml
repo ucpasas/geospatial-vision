@@ -1,0 +1,63 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: giro3d-viewer/package-lock.json
+
+      - name: Install dependencies
+        working-directory: giro3d-viewer
+        run: npm ci
+
+      - name: Copy laz-perf WASM
+        working-directory: giro3d-viewer
+        run: |
+          mkdir -p public/assets/wasm
+          cp node_modules/laz-perf/lib/laz-perf.wasm public/assets/wasm/laz-perf.wasm
+
+      - name: Build viewer
+        working-directory: giro3d-viewer
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Assemble dist
+        run: |
+          mkdir -p dist/giro3d-viewer
+          cp portfolio/index.html dist/index.html
+          cp -r giro3d-viewer/dist/* dist/giro3d-viewer/
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
