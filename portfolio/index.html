@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Geospatial Vision</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080c10;
+      --surface: #0e1318;
+      --border:  #1e2730;
+      --accent:  #4af0b0;
+      --accent2: #4a9ef0;
+      --muted:   #5a7080;
+      --text:    #c8d8e0;
+      --dim:     #3a5060;
+      --mono:    "IBM Plex Mono", monospace;
+      --sans:    "IBM Plex Sans", system-ui, sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.35;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 32px 120px;
+    }
+
+    header { margin-bottom: 72px; }
+
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: var(--mono);
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 600;
+      color: #e8f4f0;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      margin-bottom: 20px;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .tagline {
+      font-size: 15px;
+      font-weight: 300;
+      color: var(--muted);
+      max-width: 480px;
+      font-style: italic;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .projects {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-bottom: 64px;
+    }
+
+    .project-card {
+      background: var(--surface);
+      padding: 28px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-decoration: none;
+      color: inherit;
+      transition: background 0.15s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px; height: 100%;
+      background: transparent;
+      transition: background 0.15s;
+    }
+
+    .project-card:hover { background: #111820; }
+    .project-card:hover::before { background: var(--accent); }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .card-title {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 600;
+      color: #d8eae4;
+    }
+
+    .card-status {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .status-live {
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+
+    .status-active {
+      background: color-mix(in srgb, var(--accent2) 12%, transparent);
+      color: var(--accent2);
+      border: 1px solid color-mix(in srgb, var(--accent2) 25%, transparent);
+    }
+
+    .status-wip {
+      background: color-mix(in srgb, #f0a040 12%, transparent);
+      color: #f0a040;
+      border: 1px solid color-mix(in srgb, #f0a040 25%, transparent);
+    }
+
+    .card-desc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+      font-weight: 300;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      padding: 1px 6px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+    }
+
+    .card-link {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      margin-top: auto;
+      padding-top: 8px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .project-card:hover .card-link { opacity: 1; }
+
+    .project-card.no-link { cursor: default; }
+    .project-card.no-link:hover::before { background: var(--dim); }
+
+    footer {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">ucpasas · geospatial-vision</p>
+      <h1>Spatial tools,<br /><span>built from the ground up.</span></h1>
+      <p class="tagline">A working portfolio of geospatial processing, APIs, and 3D visualisation — built in public.</p>
+    </header>
+
+    <p class="section-label">Projects</p>
+
+    <div class="projects">
+
+      <a class="project-card" href="./giro3d-viewer/">
+        <div class="card-top">
+          <span class="card-title">Giro3D COPC Viewer</span>
+          <span class="card-status status-live">Live</span>
+        </div>
+        <p class="card-desc">
+          COPC point cloud from Cloudflare R2, rendered in native EPSG:6343
+          with Eye Dome Lighting and ASPRS classification filtering.
+          COG terrain served via TiTiler.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Giro3D</span>
+          <span class="tag">Three.js</span>
+          <span class="tag">COPC</span>
+          <span class="tag">WebAssembly</span>
+          <span class="tag">TiTiler</span>
+          <span class="tag">EPSG:6343</span>
+        </div>
+        <span class="card-link">Open viewer →</span>
+      </a>
+
+      <div class="project-card no-link">
+        <div class="card-top">
+          <span class="card-title">LAZ → COG + COPC Pipeline</span>
+          <span class="card-status status-active">Complete</span>
+        </div>
+        <p class="card-desc">
+          PDAL pipeline producing COG DTM and COPC from raw LAZ input.
+          Validation, CSV logging, template injection.
+          Tested against USGS Central Texas lidar — 19M points, 5.42 ppsm.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Python</span>
+          <span class="tag">PDAL</span>
+          <span class="tag">GDAL</span>
+          <span class="tag">COG</span>
+          <span class="tag">conda</span>
+        </div>
+      </div>
+
+      <div class="project-card no-link">
+        <div class="card-top">
+          <span class="card-title">FastAPI Spatial API</span>
+          <span class="card-status status-wip">Phase 4</span>
+        </div>
+        <p class="card-desc">
+          Spatial bbox query over 367k ABS Mesh Block boundaries in PostGIS.
+          Returns GeoJSON via ST_Intersects + ST_Transform.
+          Connection pooling, lifespan context.
+        </p>
+        <div class="card-tags">
+          <span class="tag">FastAPI</span>
+          <span class="tag">PostGIS</span>
+          <span class="tag">psycopg2</span>
+          <span class="tag">GeoJSON</span>
+        </div>
+      </div>
+
+      <div class="project-card no-link">
+        <div class="card-top">
+          <span class="card-title">Geoprocessor</span>
+          <span class="card-status status-active">Active</span>
+        </div>
+        <p class="card-desc">
+          GDAL-backed raster processing library. Reproject, clip,
+          COG conversion, band statistics. Full pytest suite, Docker target.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Python</span>
+          <span class="tag">GDAL</span>
+          <span class="tag">pytest</span>
+          <span class="tag">Docker</span>
+        </div>
+      </div>
+
+      <div class="project-card no-link">
+        <div class="card-top">
+          <span class="card-title">DTM → PostGIS</span>
+          <span class="card-status status-wip">Phase 3</span>
+        </div>
+        <p class="card-desc">
+          ELVIS 10m DTM loaded into PostGIS raster.
+          ST_Value, ST_SummaryStats, ST_MapAlgebra reclassification.
+          Decision note: PostGIS raster vs COG + TiTiler.
+        </p>
+        <div class="card-tags">
+          <span class="tag">PostGIS</span>
+          <span class="tag">raster2pgsql</span>
+          <span class="tag">GDA2020</span>
+        </div>
+      </div>
+
+      <div class="project-card no-link">
+        <div class="card-top">
+          <span class="card-title">Vincenty</span>
+          <span class="card-status status-active">Active</span>
+        </div>
+        <p class="card-desc">
+          Vincenty geodetic distance formula implementation and utilities.
+        </p>
+        <div class="card-tags">
+          <span class="tag">Python</span>
+          <span class="tag">Geodesy</span>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>
+      <a href="https://github.com/ucpasas/geospatial-vision" target="_blank">
+        github.com/ucpasas/geospatial-vision
+      </a>
+    </footer>
+  </main>
+</body>
+</html>
