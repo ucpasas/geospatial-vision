@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Vite build output and cache
+dist/
+.vite/
+
+# Large geospatial data files (serve locally or from S3 — do not commit)
+public/assets/*.tif
+public/assets/*.laz
+public/assets/*.copc.laz
+!public/assets/.gitkeep
+
+# Python (scripts/)
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment
+.env

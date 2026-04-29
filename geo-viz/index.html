@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEO-VIZ · deck.gl density analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d1117;
+      --surface: #161b22;
+      --surface2:#1c2128;
+      --border:  #30363d;
+      --accent:  #58a6ff;
+      --accent2: #3fb950;
+      --text:    #e6edf3;
+      --muted:   #8b949e;
+      --danger:  #f85149;
+      --mono:    "JetBrains Mono", monospace;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    /* ── Canvas ── */
+    #deck-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+
+    /* ── Panel ── */
+    #panel {
+      position: fixed;
+      top: 0; right: 0;
+      width: 16rem; height: 100%;
+      background: rgba(13, 17, 23, 0.93);
+      border-left: 1px solid var(--border);
+      display: flex; flex-direction: column;
+      backdrop-filter: blur(8px);
+      overflow-y: auto;
+      z-index: 10;
+    }
+
+    .panel-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .panel-header h1 {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .panel-header p {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .section {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── Layer toggles ── */
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .control-row:last-child { margin-bottom: 0; }
+
+    .control-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text);
+    }
+
+    .layer-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .layer-dot.scatter { background: var(--accent); }
+    .layer-dot.hex     { background: #f0883e; }
+    .layer-dot.geojson { background: var(--accent2); }
+
+    .toggle {
+      position: relative;
+      width: 32px; height: 18px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-track::after {
+      content: "";
+      position: absolute;
+      left: 2px; top: 2px;
+      width: 14px; height: 14px;
+      background: var(--muted);
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle input:checked ~ .toggle-track { background: #1f4068; }
+    .toggle input:checked ~ .toggle-track::after {
+      transform: translateX(14px);
+      background: var(--accent);
+    }
+
+    /* ── Height legend ── */
+    .legend-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right,
+        rgb(1,152,189),
+        rgb(73,227,206),
+        rgb(216,254,181),
+        rgb(254,173,84),
+        rgb(209,55,78)
+      );
+      margin: 6px 0 4px;
+    }
+
+    .legend-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    /* ── Stats ── */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px;
+    }
+
+    .stat-label { color: var(--muted); font-size: 11px; }
+
+    .stat-value {
+      font-family: var(--mono);
+      color: var(--accent2);
+      font-size: 11px;
+    }
+
+    /* ── Status bar ── */
+    #status-bar {
+      margin-top: auto;
+      padding: 8px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent2);
+      flex-shrink: 0;
+    }
+
+    #status-text {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    #point-count {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--accent);
+      margin-left: auto;
+    }
+
+    /* ── Loading overlay ── */
+    #loading-overlay {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 12px;
+    }
+
+    #loading-overlay h1 {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    #loading-message {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .loading-bar-wrap {
+      width: 160px; height: 2px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .loading-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      animation: pulse-bar 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-bar {
+      0%   { width: 0%;  margin-left: 0%; }
+      50%  { width: 60%; margin-left: 20%; }
+      100% { width: 0%;  margin-left: 100%; }
+    }
+
+    /* ── Attribution ── */
+    #attribution {
+      position: fixed;
+      bottom: 10px; left: 10px;
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      z-index: 10;
+    }
+
+    #attribution a { color: var(--muted); text-decoration: none; }
+    #attribution a:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <!-- Canvas -->
+  <canvas id="deck-canvas"></canvas>
+
+  <!-- Control panel -->
+  <aside id="panel">
+
+    <div class="panel-header">
+      <h1>Geo-Viz</h1>
+      <p>deck.gl · GPU density analytics</p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Layers</div>
+
+      <div class="control-row">
+        <div class="control-name">
+          <div class="layer-dot scatter"></div>
+          Scatter
+        </div>
+        <label class="toggle">
+          <input type="checkbox" class="layer-toggle" data-layer="scatter" checked />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <div class="control-name">
+          <div class="layer-dot hex"></div>
+          Hexagon
+        </div>
+        <label class="toggle">
+          <input type="checkbox" class="layer-toggle" data-layer="hex" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+
+      <div class="control-row">
+        <div class="control-name">
+          <div class="layer-dot geojson"></div>
+          Roads
+        </div>
+        <label class="toggle">
+          <input type="checkbox" class="layer-toggle" data-layer="geojson" />
+          <div class="toggle-track"></div>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Height ramp</div>
+      <div class="legend-bar"></div>
+      <div class="legend-labels">
+        <span>Low</span>
+        <span>High</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">Performance</div>
+      <div id="stats-container">
+        <div class="stat-row">
+          <span class="stat-label">FPS</span>
+          <span class="stat-value" id="stat-fps">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">DRAW CALLS</span>
+          <span class="stat-value" id="stat-draws">—</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">POINTS</span>
+          <span class="stat-value" id="stat-points">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 8px 16px; border-top: 1px solid var(--border); font-size: 10px; color: var(--muted); line-height: 1.5;">
+      Elevation: U.S. Geological Survey,<br/>
+      National Geospatial Program (3DEP).<br/>
+      Roads: © <a href="https://www.openstreetmap.org/copyright" style="color:var(--muted)">OpenStreetMap</a> contributors.<br/>
+      Viewer: <a href="https://deck.gl" style="color:var(--muted)">deck.gl</a> · 
+      <a href="https://github.com/ucpasas/geospatial-vision" style="color:var(--muted)">Source</a>
+    </div>
+    
+    <div id="status-bar">
+      <div class="dot"></div>
+      <span id="status-text">Ready</span>
+      <span id="point-count">—</span>
+    </div>
+
+  </aside>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay">
+    <h1>Geo-Viz</h1>
+    <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+    <div id="loading-message">Initialising…</div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+  <script>
+  document.getElementById('deck-canvas')
+    .addEventListener('contextmenu', e => e.preventDefault());
+</script>
+</body>
+</html>
