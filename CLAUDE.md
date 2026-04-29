@@ -4,6 +4,38 @@
 
 ---
 
+## Wiki Protocol (llm-wiki — Karpathy)
+
+This project follows the [llm-wiki pattern](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f). The wiki at `wiki/` is a **persistent, compounding artifact** — not a scratchpad. The LLM writes and maintains it; the human curates sources and asks questions.
+
+### Three operations — always follow these
+
+**Ingest** — when a new context document, completed phase, or design decision arrives:
+1. Read the source and discuss key takeaways
+2. Write or update the relevant `wiki/projects/*.md` page
+3. Update any touched `wiki/concepts/*.md` pages
+4. Append a dated entry to `wiki/log.md`
+5. Update the status row in `wiki/index.md`
+A single ingest may touch 5–15 wiki pages. That is expected and correct.
+
+**Query** — when answering a question about the project:
+1. Read `wiki/index.md` first to orient
+2. Read the relevant project/concept pages
+3. Synthesise an answer with citations to wiki pages
+4. **File good answers back into the wiki** — a comparison, analysis, or discovered connection that took real reasoning belongs as a wiki page, not lost in chat history
+
+**Lint** — periodically check the wiki for:
+- Contradictions between pages
+- Stale `status` fields or superseded claims
+- Orphaned pages (no inbound links)
+- Concepts mentioned but lacking their own page
+- Missing cross-references
+
+### Wiki location
+`wiki/` lives in this repo. See `wiki/WIKI_SCHEMA.md` for directory structure, frontmatter conventions, and wikilink format.
+
+---
+
 ## Projects at a Glance
 
 | Project | Status | Primary Tech |
