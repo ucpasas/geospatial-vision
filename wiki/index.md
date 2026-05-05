@@ -16,7 +16,7 @@ See [[WIKI_SCHEMA]] for conventions and workflows.
 | Page | Status | Summary |
 |---|---|---|
 | [[geoprocessor]] | active | Python/GDAL raster operations library — reproject, clip, COG conversion, stats |
-| [[pipeline-system]] | complete | PDAL dual pipeline: DTM (COG) + COPC from .laz input. All 4 phases done. Backlog: COG overviews, batch, remote LAZ indexing. |
+| [[pipeline-system]] | complete | PDAL multi-mode pipeline: DTM (COG) + COPC/LAZ. 5 phases done. Configurable density threshold. COPC directory merge blocked (writers.copc not streamable) — use `--mode laz` for large datasets. |
 | [[giro3d-viewer]] | complete | Giro3D WebGL COPC viewer with EDL, ASPRS classification, COG terrain. All 4 phases live on GitHub Pages. |
 | [[geo-viz]] | complete | deck.gl v9 density analytics viewer — COG range requests direct to browser, ScatterplotLayer + HexagonLayer + GeoJsonLayer. All 3 phases live on GitHub Pages. |
 | [[fastapi-spatial-api]] | active | FastAPI + PostGIS bbox query over ABS Mesh Blocks. Phase 5 (QGIS load) next. |

@@ -17,7 +17,7 @@ Critical constraints. Deviating from these breaks ABI compatibility and causes s
 
 | Package | Method | Why |
 |---|---|---|
-| `gdal` / `osgeo` | **apt only** (`python3-gdal`) | Must match the C library ABI of `libgdal-dev` |
+| `gdal` / `osgeo` | **apt** (`python3-gdal`) for Geoprocessor venv; **conda-forge** (`gdal`) for `lidar` env | conda's Python shadows system Python in the combined env — apt-installed osgeo is unreachable from conda |
 | `numpy` | **apt only** (`python3-numpy`) | Must match GDAL's compiled numpy ABI |
 | `pdal` / `python-pdal` | **conda-forge only** (`lidar` env) | apt package missing on Ubuntu 24.04; pip incompatible with system PDAL 2.6.2 |
 | `pytest`, `fastapi`, `uvicorn`, etc. | `pip` inside venv | No ABI constraints |
@@ -48,7 +48,7 @@ source .venv/bin/activate
 pip install pytest                              # pip packages only
 ```
 
-`--system-site-packages` is the key flag — it exposes the apt-installed `osgeo` and `numpy` to the venv.
+`--system-site-packages` is the key flag — it exposes the apt-installed `osgeo` and `numpy` to the venv. Note: this only helps when the venv's Python is active; in the combined pipeline environment, conda's Python wins and needs its own `gdal` install (see [[conda-lidar-env]]).
 
 ---
 

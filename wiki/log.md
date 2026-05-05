@@ -1,12 +1,59 @@
 ---
 type: log
 created: 2026-04-22
-updated: 2026-04-29
+updated: 2026-05-05
 ---
 
 # Session Log
 
 Append-only. One entry per session. Most recent at top.
+
+---
+
+## 2026-05-05 — Pipeline: density threshold CLI arg, COPC streaming limitation, LAZ streaming
+
+**Action:** Update  
+**Summary:** Extended pipeline with configurable density threshold; investigated and documented writers.copc streaming limitation; implemented execute_streaming() for LAZ directory merge.
+
+**Key changes:**
+- `--density-threshold PPSM` CLI arg added to `run_pipeline.py` (default 4.0)
+- `ValidationResult.density_threshold` field — printed in `report()` for traceability
+- `validate()` accepts `density_threshold` param, passes to `ValidationResult`
+- `run_dtm_tiles()` accepts `density_threshold` and forwards to each tile's `validate()` call
+- `execute_streaming()` used for LAZ directory merge — streams points chunk-by-chunk, bounded RAM
+- COPC directory merge is blocked: `writers.copc` not streamable (requires full octree in RAM)
+  - Melbourne dataset (~300M points) ≈ 20–30 GB — OOM on WSL2
+  - No fix implemented; `--mode laz` is the practical workaround; `untwine` is the tool-level solution
+
+**Data insights — City of Melbourne 2018:**
+- Ground ratio after SMRF: ~53% (vs ~77% for flat rural Texas)
+- Raw tile density: ~5.65 ppsm; post-SMRF DTM density: ~3.0 ppsm
+- Default 4.0 ppsm threshold fails for Melbourne — use `--density-threshold 2.5` or lower
+
+**Wiki pages updated:** `pipeline-system.md`, `copc.md`, `smrf.md`
+
+---
+
+## 2026-05-04 — Pipeline Phase 5: multi-mode, directory input, GDAL merge COG
+
+**Action:** Update  
+**Summary:** Extended pipeline system with directory input support, four output modes, per-tile DTM processing, and GDAL-based COG merge. Prompted by City of Melbourne 2018 dataset (215 tiles, 8.6 GB, all Class 0 — unclassified).
+
+**Key changes:**
+- New `--mode` choices: `dtm+copc` (default), `dtm+laz`, `copc`, `laz`
+- `resolve_input()` — detects file vs directory, returns glob pattern + individual file list
+- `run_dtm_tiles()` — sequential per-tile DTM; logs each tile; continues on failure
+- `merge_dtm_to_cog()` — `gdal.BuildVRT` + `gdal.Translate(format="COG", OVERVIEWS=AUTO)`
+- `cleanup_dtm_tiles()` — deletes tile intermediates after successful merge
+- `validate.py` — `density_ppsm`/`density_valid` now `None` for modes without DTM
+- `logger.py` — added `mode` column; `density_ppsm` writes empty string when `None`
+- `laz_template.json` added: `readers.las` → `writers.las(compression=true)`
+- `writers.las` added to `SUPPORTED_STAGES`
+
+**Design constraints discovered:**
+- CoM 2018 tiles are all Class 0 — SMRF required, no shortcut
+- SMRF cannot merge 215 tiles on 11 GB RAM → per-tile sequential is the only viable approach
+- `writers.copc` + `writers.las` accept glob input natively — directory COPC/LAZ merge runs as a single PDAL pipeline
 
 ---
 

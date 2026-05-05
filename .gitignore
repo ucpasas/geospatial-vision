@@ -13,3 +13,6 @@ __pycache__/
 
 # Conda installer
 Miniconda3-*.sh
+
+# Claude Code project memory
+.claude/

@@ -31,7 +31,7 @@ conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 # Create env and install
 conda create -n lidar python=3.12 -y
 conda activate lidar
-conda install -c conda-forge pdal python-pdal pytest -y
+conda install -c conda-forge pdal python-pdal pytest gdal -y
 ```
 
 ---
@@ -43,21 +43,29 @@ conda install -c conda-forge pdal python-pdal pytest -y
 | Python | 3.12 |
 | pdal (C++) | 3.5.3 |
 | python-pdal | 3.5.3 |
+| gdal (osgeo) | conda-forge latest |
 | pytest | latest |
 
 ---
 
 ## Daily Use
 
+Three environments must be active simultaneously: `(lidar)` `(.venv)` `(base)`. Order matters:
+
 ```bash
+cd Geoprocessor/pipeline/
 conda activate lidar
 cd /home/kisar/src/geospatial-vision
-python Geoprocessor/pipeline/run_pipeline.py <input.laz>
+source .venv/bin/activate
+cd Geoprocessor/pipeline/
+python run_pipeline.py <input.laz>
 ```
+
+This is convoluted by design — backlog item 9 in [[pipeline-system]] tracks a `run.sh` wrapper to hide this.
 
 ---
 
 ## Notes
 
 - This env is **local dev only** — the Dockerfile will use apt or an internal conda install
-- Do not install GDAL or numpy into this env — those come from apt system-wide
+- GDAL (`osgeo`) is installed here via conda-forge because conda's Python is the active interpreter in the combined environment — the apt-installed `python3-gdal` is only reachable from system Python, which gets shadowed by conda in the activation sequence

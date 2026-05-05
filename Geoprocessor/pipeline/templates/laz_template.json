@@ -1,0 +1,13 @@
+{
+    "pipeline": [
+        {
+            "type": "readers.las",
+            "filename": ""
+        },
+        {
+            "type": "writers.las",
+            "filename": "",
+            "compression": true
+        }
+    ]
+}

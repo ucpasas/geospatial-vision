@@ -27,6 +27,7 @@ jobs:
           cache-dependency-path: |
             giro3d-viewer/package-lock.json
             geo-viz/package-lock.json
+            map-viewer/package-lock.json
 
       - name: Install giro3d-viewer dependencies
         working-directory: giro3d-viewer
@@ -54,6 +55,16 @@ jobs:
         env:
           NODE_ENV: production
 
+      - name: Install map-viewer dependencies
+        working-directory: map-viewer
+        run: npm ci
+
+      - name: Build map-viewer
+        working-directory: map-viewer
+        run: npm run build
+        env:
+          NODE_ENV: production
+
       - name: Assemble dist
         run: |
           mkdir -p dist/giro3d-viewer
@@ -61,6 +72,7 @@ jobs:
           cp portfolio/index.html dist/index.html
           cp -r giro3d-viewer/dist/* dist/giro3d-viewer/
           cp -r geo-viz/dist/* dist/geo-viz/
+          cp -r map-viewer/dist/* dist/map-viewer/
 
       - uses: actions/upload-pages-artifact@v3
         with:
