@@ -104,6 +104,10 @@ USGS_LPC_TX_Central_B1_2017_stratmap17_50cm_2996011a1_LAS_2019.laz,dtm+copc,1899
 - Processing constraint: SMRF cannot merge all tiles on 11 GB RAM — directory mode runs per-tile DTM, then merges with GDAL
 - COPC constraint: ~300M total points × 36 bytes ≈ 20–30 GB RAM for octree construction — OOM on WSL2. Use `--mode dtm+laz` for this dataset. COPC conversion requires `untwine` or a machine with ≥32 GB RAM.
 
+**Confirmed R2 outputs (Melbourne 2018):**
+- COG DTM: `cog/Melbourne_2018_dtm_f32_v2.tif` — float32, v2 reprocessing, in use by all three viewers
+- COPC: `copc/Melbourne_2018.laz.copc` — note `.laz.copc` extension (differs from pipeline output convention `{stem}.copc.laz` — renamed on upload)
+
 ---
 
 ## Module Responsibilities
@@ -246,7 +250,8 @@ For directory input, `stem` is derived from the directory name.
 
 1. ~~**COG overviews**~~ — ✅ Done. `merge_dtm_to_cog()` uses `OVERVIEWS=AUTO` via GDAL COG driver.
 2. ~~**Tile processing**~~ — ✅ Done. `run_dtm_tiles()` + GDAL merge.
-3. **Remote LAZ indexing** *(priority research)* — Generate a COPC-compatible spatial index as a sidecar file alongside unmodified LAZ on S3. No file modification. Serve via lightweight range-request proxy.
+3. **Large dataset COPC** — ✅ Solved with `untwine` v1.5.1 (`conda install -c conda-forge untwine`). Run outside the pipeline after `--mode laz` merge. Validated on Melbourne 2018 (353M points, full 4 GB source, no OOM). Separate from remote LAZ indexing below.
+   **Remote LAZ indexing** *(still pending)* — Generate a COPC-compatible spatial index as a sidecar alongside unmodified LAZ on S3 for serving without full COPC rebuild.
 4. **Dockerfile** — Determine apt vs conda for PDAL in container. Ubuntu 22.04 may have `python3-pdal` — check before defaulting to conda.
 5. **Template injection scaling** — Current `load_pipeline()` uses prefix matching per stage. Fine for current templates; move to convention-based injection if templates grow beyond ~5.
 6. **SMRF parameter exposure** — Expose `slope/window/threshold/scalar` as CLI args for terrain-specific tuning (urban vs forest vs flat).

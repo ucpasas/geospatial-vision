@@ -246,9 +246,9 @@
           <span class="card-status status-live">Live</span>
         </div>
         <p class="card-desc">
-          COPC point cloud from Cloudflare R2, rendered in native EPSG:6343
-          with Eye Dome Lighting and ASPRS classification filtering.
-          COG terrain served via TiTiler.
+          City of Melbourne 2018 COPC point cloud (353M points) from Cloudflare R2,
+          rendered in native EPSG:28355 with Eye Dome Lighting and ASPRS
+          classification filtering. COG terrain served via TiTiler.
         </p>
         <div class="card-tags">
           <span class="tag">Giro3D</span>
@@ -256,10 +256,32 @@
           <span class="tag">COPC</span>
           <span class="tag">WebAssembly</span>
           <span class="tag">TiTiler</span>
-          <span class="tag">EPSG:6343</span>
+          <span class="tag">EPSG:28355</span>
         </div>
         <span class="card-link">Open viewer →</span>
       </a>
+
+      <a class="project-card" href="./map-viewer/">
+        <div class="card-top">
+          <span class="card-title">Map Viewer · PMTiles + COG</span>
+          <span class="card-status status-live">Live</span>
+        </div>
+        <p class="card-desc">
+          Serverless vector tiles via PMTiles — 367k ABS Mesh Blocks served from
+          Cloudflare R2 via HTTP range requests. Melbourne 2018 DTM COG via TiTiler.
+          Category-based land use colouring with layer toggles.
+        </p>
+        <div class="card-tags">
+          <span class="tag">MapLibre</span>
+          <span class="tag">PMTiles</span>
+          <span class="tag">TiTiler</span>
+          <span class="tag">COG</span>
+          <span class="tag">tippecanoe</span>
+          <span class="tag">ABS</span>
+        </div>
+        <span class="card-link">Open viewer →</span>
+      </a>
+
 
       <a class="project-card" href="./geo-viz/">
         <div class="card-top">
@@ -267,10 +289,10 @@
           <span class="card-status status-live">Live</span>
         </div>
         <p class="card-desc">
-          COG DTM sampled directly via range requests and rendered as
-          153k points at 144 FPS. ScatterplotLayer, HexagonLayer, and
-          GeoJsonLayer over OSM roads. CRS derived from file metadata at runtime.
-        </p>
+          City of Melbourne 2018 DTM COG sampled directly via range requests
+          and rendered as 191k points at 144 FPS. ScatterplotLayer, HexagonLayer,
+          and GeoJsonLayer over Melbourne OSM roads. CRS derived from file metadata at runtime.
+        </p>        
         <div class="card-tags">
           <span class="tag">deck.gl</span>
           <span class="tag">geotiff.js</span>
@@ -370,27 +392,6 @@
           <span class="tag">Geodesy</span>
         </div>
         <span class="card-link">View source →</span>
-      </a>
-
-      <a class="project-card" href="./map-viewer/">
-        <div class="card-top">
-          <span class="card-title">Map Viewer · PMTiles + COG</span>
-          <span class="card-status status-live">Live</span>
-        </div>
-        <p class="card-desc">
-          Serverless vector tiles via PMTiles — 367k ABS Mesh Blocks served from
-          Cloudflare R2 via HTTP range requests. Melbourne 2018 DTM COG via TiTiler.
-          Category-based land use colouring with layer toggles.
-        </p>
-        <div class="card-tags">
-          <span class="tag">MapLibre</span>
-          <span class="tag">PMTiles</span>
-          <span class="tag">TiTiler</span>
-          <span class="tag">COG</span>
-          <span class="tag">tippecanoe</span>
-          <span class="tag">ABS</span>
-        </div>
-        <span class="card-link">Open viewer →</span>
       </a>
 
     </div>

@@ -10,6 +10,48 @@ Append-only. One entry per session. Most recent at top.
 
 ---
 
+## 2026-05-05 — Ingest: W4T4 session summary (map-viewer build + Melbourne migration)
+
+**Action:** Ingest  
+**Summary:** Ingested `session_w4t4_map-viewer.md`. Captured build details, data pipelines, bugs, and tooling that were missing from earlier wiki updates.
+
+**New facts added:**
+- `untwine` v1.5.1 installed via conda-forge and confirmed on Melbourne 2018 (353M pts, 4 GB source, no OOM) — pipeline-system COPC backlog item resolved
+- Melbourne COPC exact metadata: 353,634,995 pts, bounds X 314500–323500 / Y 5808500–5817500 / Z −20–302m, LAS 1.4 format 7 (RGB)
+- tippecanoe full command and zoom/simplification decisions for PMTiles build
+- float32 vs float64 COG browser compatibility issue documented (geotiff.js array buffer error on float64)
+- go-pmtiles v1.30.0 install gotcha: release URL requires explicit version in filename
+- Four map-viewer bugs documented (markdown mangled URL, missing `pmtiles://` prefix, TiTiler 422 duplicate URL, COG bounds mismatch)
+- R2 bucket structure expanded: added `pmtiles/` and `vector/` prefixes
+
+**COG file name discrepancy:** session doc says `Melbourne_2018_dtm_f32.tif`; code uses `Melbourne_2018_dtm_f32_v2.tif`. Using `v2` (code is source of truth).
+
+**Wiki pages updated:** `concepts/copc.md`, `concepts/cog.md`, `concepts/pmtiles.md`, `projects/map-viewer.md`, `projects/giro3d-viewer.md`, `projects/pipeline-system.md`, `environment/r2-setup.md`
+
+---
+
+## 2026-05-05 — All viewers migrated to City of Melbourne 2018 dataset
+
+**Action:** Update  
+**Summary:** All three viewers (giro3d-viewer, geo-viz, map-viewer) switched data source from USGS Central Texas to City of Melbourne 2018. CRS migrated from EPSG:6343 to EPSG:28355 in giro3d-viewer. Portfolio updated. Map Viewer card moved into main viewer section.
+
+**Key changes:**
+- `giro3d-viewer/src/config.js` — COPC: `Melbourne_2018.laz.copc`; terrain: `Melbourne_2018_dtm_f32_v2.tif`
+- `giro3d-viewer/src/viewer.js` — `registerCRS()` now registers EPSG:28355 (GDA94 / MGA zone 55) with full datum shift parameters
+- `geo-viz/src/config.js` — COG: `Melbourne_2018_dtm_f32_v2.tif`; roads: `Melbourne.geojson`; sample 600×600 (was 400×400) → 191k points (was 153k)
+- `map-viewer/src/config.js` — COG URL updated to `Melbourne_2018_dtm_f32_v2.tif`
+- `portfolio/index.html` — Giro3D card updated (353M points, EPSG:28355); Geo-Viz card updated (191k points, Melbourne); Map Viewer card repositioned to main viewer section
+
+**Confirmed R2 state:**
+- `cog/Melbourne_2018_dtm_f32_v2.tif` — float32 COG, in use by all three viewers
+- `copc/Melbourne_2018.laz.copc` — full 353M-point COPC (note `.laz.copc` extension, differs from pipeline naming convention)
+- `pmtiles/mesh_blocks_v2.pmtiles` — ABS Mesh Blocks (165 MB)
+- `vector/roads/Melbourne.geojson` — OSM Melbourne roads
+
+**Wiki pages updated:** `giro3d-viewer.md`, `geo-viz.md`, `map-viewer.md`, `pipeline-system.md`
+
+---
+
 ## 2026-05-05 — Wiki audit: map-viewer and pmtiles pages added; CI docs; wiki location fixed
 
 **Action:** Ingest + Lint  

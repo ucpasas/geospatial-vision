@@ -1,5 +1,5 @@
 export const PMTILES_URL = 'pmtiles://https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/pmtiles/mesh_blocks_v2.pmtiles';
-export const COG_TILES_URL = 'https://geospatial-titiler.onrender.com/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?url=https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/cog/Melbourne_2018_dtm.tif&colormap_name=terrain&rescale=-5,100';
+export const COG_TILES_URL = 'https://geospatial-titiler.onrender.com/cog/tiles/WebMercatorQuad/{z}/{x}/{y}?url=https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/cog/Melbourne_2018_dtm_f32_v2.tif&colormap_name=terrain&rescale=-5,100';
 export const INITIAL_CENTER = [133.0, -27.0]; // centre of Australia
 export const INITIAL_ZOOM = 4;
 

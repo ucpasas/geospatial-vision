@@ -1,7 +1,7 @@
 ---
 tags: [project, deck.gl, webgl, cog, osm, github-pages]
 created: 2026-04-29
-updated: 2026-04-29
+updated: 2026-05-05
 status: complete
 type: project
 related: [[pipeline-system]], [[giro3d-viewer]], [[cog]], [[r2-setup]]
@@ -59,7 +59,7 @@ Only `layers.js` imports from `deck.gl`. Only `cog.js` imports from `geotiff`. O
 ```
 COG DTM (.tif) on Cloudflare R2
     ↓ HTTP range requests via geotiff.js
-Browser reads overview at 400×400 (geotiff picks best overview)
+Browser reads overview at 600×600 (geotiff picks best overview)
     ↓ pixel → UTM → WGS84 via proj4 (CRS from embedded geokeys)
 Array<{lon, lat, height}>
     ↓ fed to
@@ -77,10 +77,10 @@ GitHub Pages
 - COG loaded from Cloudflare R2 via HTTP range requests — **no tile server**
 - CRS derived at runtime from COG's embedded geokeys — no hardcoded proj strings
 - Map centre derived from COG bounding box at runtime — no hardcoded coordinates
-- Raster read at 400×400 via `readRasters({ width, height })` — geotiff picks best overview
+- Raster read at 600×600 via `readRasters({ width, height })` — geotiff picks best overview
 - `nearest` resampling — avoids nodata interpolation artifacts at tile boundaries
 - Nodata filter: exact `NODATA = -9999` match + `!isFinite(h)` guard
-- 153k points rendered via `ScatterplotLayer` at 144 FPS
+- 191k points rendered via `ScatterplotLayer` at 144 FPS
 - Height colour ramp calibrated to dataset min/max at load time
 - FPS counter via `requestAnimationFrame` polling `deck.metrics`
 - Bbox printed to browser console on load (for Overpass query alignment)
@@ -90,12 +90,12 @@ GitHub Pages
 ## Phase 2 — HexagonLayer + GeoJsonLayer
 
 - `HexagonLayer` — GPU aggregation over same point array, colour by mean height, extruded
-- `GeoJsonLayer` — OSM roads fetched from R2, styled by highway type
-- OSM data exported via Overpass API, clipped to tile bounding box; 17 features (residential, service, tertiary — sparse rural Texas coverage)
+- `GeoJsonLayer` — Melbourne OSM roads fetched from R2 (`vector/roads/Melbourne.geojson`), styled by highway type
+- OSM data exported via Overpass API, clipped to Melbourne COG bounding box; denser urban coverage vs previous Texas data
 - Roads render flat at z=0 — no terrain draping (known limitation, see below)
 - All three layers toggleable via panel switches
 - Tooltips on all layers: point coords/height, hex bin count/mean, road type/name
-- USGS + OSM attributions in panel footer
+- City of Melbourne + OSM attributions in panel footer
 
 ---
 
@@ -112,10 +112,10 @@ GitHub Pages
 ## Key Config Values (`config.js`)
 
 ```js
-COG_URL         // Cloudflare R2 public URL for COG DTM (.tif)
-GEOJSON_URL     // Cloudflare R2 public URL for OSM roads (.geojson)
-SAMPLE_WIDTH    // 400 — raster read width
-SAMPLE_HEIGHT   // 400 — raster read height
+COG_URL         // Cloudflare R2 public URL for COG DTM (.tif) — currently Melbourne_2018_dtm_f32_v2.tif
+GEOJSON_URL     // Cloudflare R2 public URL for OSM roads (.geojson) — currently Melbourne.geojson
+SAMPLE_WIDTH    // 600 — raster read width
+SAMPLE_HEIGHT   // 600 — raster read height
 NODATA          // -9999 — must match what PDAL wrote into the COG
 INITIAL_ZOOM    // 14
 INITIAL_PITCH   // 45
@@ -131,11 +131,11 @@ HEX_ELEVATION_SCALE // 4 — vertical exaggeration
 
 | Property | Value |
 |---|---|
-| Elevation | USGS 3DEP lidar, Central Texas (same tile as [[giro3d-viewer]]) |
-| Tile bbox (WGS84) | `29.984,−97.000, 29.999,−96.984` |
-| COG CRS | EPSG:6343 (NAD83(2011) / UTM zone 14N) |
-| Roads | OpenStreetMap via Overpass API, ODbL licence |
-| Road features | 17 (residential, service, tertiary) |
+| Elevation | City of Melbourne 2018 DTM COG (`Melbourne_2018_dtm_f32_v2.tif`) |
+| COG CRS | EPSG:28355 (GDA94 / MGA zone 55) — derived at runtime from embedded geokeys |
+| Point sample | 600×600 → 191k points |
+| Roads | Melbourne OSM via Overpass API (`Melbourne.geojson`), ODbL licence |
+| License | CC BY 4.0 (elevation); ODbL (roads) |
 
 ---
 

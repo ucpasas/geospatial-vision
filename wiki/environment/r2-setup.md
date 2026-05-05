@@ -39,8 +39,10 @@ The account ID is the 32-char hex string visible in the Cloudflare dashboard URL
 
 | Bucket | Prefix | Contents |
 |---|---|---|
-| `geospatial-vision` | `copc/` | COPC point cloud files (`.copc.laz`) |
-| `geospatial-vision` | `cog/` | COG terrain files (`.tif`) — live, served via TiTiler |
+| `geospatial-vision` | `copc/` | COPC point cloud files — e.g. `Melbourne_2018.laz.copc` |
+| `geospatial-vision` | `cog/` | COG terrain files — e.g. `Melbourne_2018_dtm_f32_v2.tif` (float32, served via TiTiler) |
+| `geospatial-vision` | `pmtiles/` | PMTiles vector tile archives — e.g. `mesh_blocks_v2.pmtiles` |
+| `geospatial-vision` | `vector/` | GeoJSON vector files — e.g. `roads/Melbourne.geojson` |
 
 ---
 

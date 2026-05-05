@@ -1,7 +1,7 @@
 ---
 tags: [project, giro3d, copc, cog, webgl, three.js, github-pages]
 created: 2026-04-27
-updated: 2026-04-27
+updated: 2026-05-05
 status: complete
 type: project
 related: [[pipeline-system]], [[copc]], [[cog]], [[r2-setup]]
@@ -56,10 +56,10 @@ Only `viewer.js`, `pointcloud.js`, and `terrain.js` import from `@giro3d/giro3d`
 ### Data flow
 
 ```
-USGS LAZ → PDAL pipeline → COG DTM + COPC → Cloudflare R2
+CoM 2018 LAZ tiles → PDAL pipeline → COG DTM + COPC → Cloudflare R2
   COG → TiTiler (Render) → terrain tiles → Giro3D ElevationLayer
   COPC → COPCSource → point stream → Giro3D PointCloud
-  → Browser (EPSG:6343, Three.js, laz-perf WASM) → GitHub Pages
+  → Browser (EPSG:28355, Three.js, laz-perf WASM) → GitHub Pages
 ```
 
 ---
@@ -68,8 +68,8 @@ USGS LAZ → PDAL pipeline → COG DTM + COPC → Cloudflare R2
 
 - Vite project with `@giro3d/giro3d` v2.0.2
 - COPC loaded from Cloudflare R2 via `COPCSource`
-- Rendered natively in **EPSG:6343** (NAD83(2011) / UTM zone 14N) — hardcoded, no epsg.io fetch at runtime
-- `CoordinateSystem.register("EPSG:6343", proj4_string)` called before `Instance` creation
+- Rendered natively in **EPSG:28355** (GDA94 / MGA zone 55 — Melbourne) — hardcoded, no epsg.io fetch at runtime
+- `CoordinateSystem.register("EPSG:28355", proj4_string)` called before `Instance` creation
 - Eye-Dome Lighting enabled by default: radius 0.6, strength 5
 - laz-perf WASM path set via `setLazPerfPath()` in `config.js`; handles localhost vs Pages subdirectory automatically
 
@@ -92,7 +92,7 @@ USGS LAZ → PDAL pipeline → COG DTM + COPC → Cloudflare R2
 - COG DTM produced by the [[pipeline-system]] and uploaded to R2 under `cog/` prefix
 - TiTiler deployed on Render (free tier, Docker image `ghcr.io/developmentseed/titiler:latest`)
 - Terrain served as `WebMercatorQuad` tiles; Giro3D `ElevationLayer` consumes them
-- COG confirmed: EPSG:6343, 3076×3517, overviews [2,4,8], nodata -9999
+- COG: `Melbourne_2018_dtm_f32_v2.tif` on R2, EPSG:28355, float32, colormap `terrain`, rescale −5–100
 - COPC and COG spatially aligned — confirmed visually (ground points sit on terrain surface when class 2 only is displayed)
 - **Known issue:** `MapboxTerrainFormat` expects terrain-RGB encoded tiles but TiTiler `/cog/tiles/` serves raw elevation. Terrain values are incorrect. Will be resolved when the Cloudflare Worker COG proxy is built (see Backlog).
 
@@ -124,14 +124,21 @@ No secrets in `config.js` — all URLs are public R2.dev or public Render endpoi
 
 | Property | Value |
 |---|---|
-| File | `USGS_LPC_TX_Central_B1_2017_stratmap17_50cm_2996011a1_LAS_2019.laz` |
-| Points | ~19M per tile |
-| CRS | EPSG:6343 (NAD83(2011) / UTM zone 14N) |
-| Ground ratio | ~77% |
-| Density | 5.42 ppsm |
-| DTM resolution | 0.5m |
-| License | US Government Public Domain |
-| Attribution | "U.S. Geological Survey, National Geospatial Program (3DEP)" |
+| Source | City of Melbourne 2018 3D Point Cloud |
+| COPC file | `Melbourne_2018.laz.copc` (R2: `copc/`) |
+| COG file | `Melbourne_2018_dtm_f32_v2.tif` (R2: `cog/`) |
+| Total points | 353,634,995 (exact) |
+| CRS | EPSG:28355 (GDA94 / MGA zone 55) |
+| Bounds | X 314500–323500, Y 5808500–5817500, Z −20–302 m |
+| LAS format | LAS 1.4, point format 7 (includes RGB) |
+| Ground ratio | ~53% (urban scene, all Class 0 — SMRF required) |
+| DTM density | ~3 ppsm |
+| License | CC BY 4.0 |
+| Attribution | "City of Melbourne, 3D Point Cloud 2018" |
+
+**COPC conversion:** built with `untwine` v1.5.1 (`conda install -c conda-forge untwine`) — out-of-core, handles full 4 GB source without OOM on WSL2 11 GB RAM. CRS (EPSG:28355) embedded correctly by PDAL during Untwine processing.
+
+Note: COPC file uses `.laz.copc` extension — differs from the pipeline output convention `{stem}.copc.laz`.
 
 ---
 
@@ -149,7 +156,7 @@ No secrets in `config.js` — all URLs are public R2.dev or public Render endpoi
 
 | Decision | Choice | Reason |
 |---|---|---|
-| CRS | EPSG:6343 hardcoded | Matches USGS source; no epsg.io fetch at runtime |
+| CRS | EPSG:28355 hardcoded | Matches Melbourne 2018 source (GDA94 / MGA zone 55); no epsg.io fetch at runtime |
 | WASM | laz-perf (peer dep of giro3d) | Ships with `@giro3d/giro3d`, LASzip C++ via Emscripten |
 | Classification filter | `source.filters` (not visibility) | Filtered classes never decoded — saves bandwidth + memory |
 | Colour ramp | `colormap` npm package | Same as official Giro3D example |
@@ -166,7 +173,7 @@ No secrets in `config.js` — all URLs are public R2.dev or public Render endpoi
 3. **On-the-fly LAZ rendering** — Stream raw LAZ without pre-converting to COPC. Replace `pointcloud.js` only; other modules unchanged. Requires WebWorker + laz-perf + browser-side octree build. Build COG Worker first to learn the range-request pattern.
 4. **Potree comparison** — Same COPC data + classification filter, different renderer. Validates the modular architecture (`filters.js`, `ui.js`, `terrain.js` should be reusable unchanged).
 5. **Multi-tile support** — When batch pipeline processing is added, the viewer needs to handle multiple COPC files. `COPCSource` is single-URL — investigate Giro3D multi-source or tile-switching UI.
-6. **CRS migration to EPSG:7855** — When Australian data is added, update `viewer.js` registration and `index.html` panel label. Currently EPSG:6343 throughout.
+6. ~~**CRS migration to Australian data**~~ — ✅ Done. Migrated to EPSG:28355 (GDA94/MGA zone 55) with City of Melbourne 2018 dataset.
 
 ---
 

@@ -1,7 +1,7 @@
 ---
 tags: [concept, cog, raster, cloud, geotiff]
 created: 2026-04-22
-updated: 2026-04-29
+updated: 2026-05-05
 status: active
 type: concept
 related: [[gdal]], [[geoprocessor]], [[pipeline-system]], [[geo-viz]], [[postgis-vs-titiler]]
@@ -65,6 +65,26 @@ const [band] = await image.readRasters({
 - **CORS:** The R2 bucket must have CORS configured to allow `GET` and range request headers from the browser origin
 
 This pattern requires no tile server (no TiTiler, no GDAL server). The tradeoff: the full tile IFD is fetched on open, and large areas at full resolution require many range requests — suitable for overview-level visualisation, not pixel-perfect queries.
+
+---
+
+## float32 vs float64 for Browser Compatibility
+
+GDAL defaults to float64 for elevation COGs. **geotiff.js in the browser cannot allocate a float64 typed array for large rasters** — it throws an array buffer allocation error.
+
+Always rebuild elevation COGs as float32 before serving to the browser:
+
+```bash
+gdal_translate -ot Float32 -of COG \
+  -co COMPRESS=DEFLATE -co OVERVIEW_RESAMPLING=NEAREST \
+  input_f64.tif output_f32.tif
+```
+
+**Precision impact:** float32 provides ~7 significant digits — for elevation at 302m, precision is ~0.02mm. This is orders of magnitude more precise than LiDAR sensor accuracy (~25cm). No practical loss for visualisation.
+
+**Melbourne 2018 example:**
+- Original: `Melbourne_2018_dtm.tif` — float64, 18001×18001, 1.6 GB
+- Rebuilt: `Melbourne_2018_dtm_f32_v2.tif` — float32, same resolution, 715 MB, 6 overview levels (2→64)
 
 ---
 

@@ -5,15 +5,15 @@
 
 // COG DTM — served directly from R2, read via geotiff.js range requests.
 // Replace with your R2 public URL.
-export const COG_URL = 'https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/cog/USGS_LPC_TX_Central_B1_2017_stratmap17_50cm_2996011a1_LAS_2019_dtm_cog.tif';
+export const COG_URL = 'https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/cog/Melbourne_2018_dtm_f32_v2.tif';
 
-// GeoJSON roads/infrastructure — Phase 2, source TBD.
-export const GEOJSON_URL = 'https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/vector/roads/TX_Central_B1.geojson';
+// GeoJSON roads/infrastructure.
+export const GEOJSON_URL = 'https://pub-729a4f32b70f473abbf23bf25daf2899.r2.dev/vector/roads/Melbourne.geojson';
 
 // COG sampling — geotiff.js picks the best overview to satisfy these dimensions.
 // 400x400 = 160k pixels, well within GPU budget, good spatial coverage at z14.
-export const SAMPLE_WIDTH  = 400;
-export const SAMPLE_HEIGHT = 400;
+export const SAMPLE_WIDTH  = 600;
+export const SAMPLE_HEIGHT = 600;
 
 // Nodata sentinel — must match what PDAL wrote into the COG.
 export const NODATA = -9999;

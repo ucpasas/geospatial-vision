@@ -3,7 +3,7 @@
 // Terrain layer — Map entity + ElevationLayer.
 //
 // Phase 3 swap: replace TERRAIN_URL and format in config.js.
-// If TiTiler serves EPSG:7855 natively, also update the XYZ projection.
+// If TiTiler serves EPSG:28355 natively, also update the XYZ projection.
 //
 // This module is intentionally thin — all config lives in config.js,
 // all Giro3D wiring is isolated here so terrain can be swapped or
@@ -44,7 +44,7 @@ export function extentFromVolume(crs, volume, margin = 1.2) {
  *   1. Update TERRAIN_URL in config.js to your TiTiler tile URL template
  *   2. If TiTiler serves terrain-rgb: keep MapboxTerrainFormat
  *      If TiTiler serves raw elevation: swap format accordingly
- *   3. Update TERRAIN_PROJECTION in config.js if serving EPSG:7855 natively
+ *   3. Update TERRAIN_PROJECTION in config.js if serving EPSG:28355 natively
  *
  * @param {Instance} instance
  * @param {Extent} extent

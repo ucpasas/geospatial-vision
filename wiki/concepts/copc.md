@@ -82,9 +82,21 @@ The ~36 bytes/point estimate includes point data, octree node metadata, and PDAL
 
 Merging tiles into a single LAZ first, then converting that LAZ to COPC, does not help — the COPC conversion still requires the same in-memory octree. The sequence `LAZ merge → COPC` avoids the merge OOM (LAZ writers are streaming), but the final COPC conversion hits the same ceiling.
 
-### Purpose-built Alternative: untwine
+### Purpose-built Alternative: untwine ✅ Installed & Used
 
-`untwine` is a purpose-built COPC indexer that works on-disk rather than in-RAM. It streams points into a tile structure, builds the octree incrementally, and is the recommended tool for large datasets. It is not part of the [[pipeline-system]] backlog yet (item 3: remote LAZ indexing research is the prerequisite).
+`untwine` is a purpose-built COPC indexer that works on-disk rather than in-RAM. It streams points into a tile structure, builds the octree incrementally, and handles datasets that would OOM with `writers.copc`.
+
+**Install (lidar conda env):**
+```bash
+conda install -c conda-forge untwine
+```
+
+**Usage:**
+```bash
+untwine --input <input.las_or_dir> --output <output.copc.laz>
+```
+
+**Confirmed on Melbourne 2018:** 353,634,995 points from a 4 GB source LAS zip — processed without RAM overflow on WSL2 (11 GB). Output: `Melbourne_2018.laz.copc` (`.laz.copc` extension, note: differs from PDAL convention).
 
 ---
 
@@ -96,9 +108,9 @@ COPC creation is a **separate, expensive preprocessing step** — not a write-th
 |---|---|---|---|
 | `writers.copc` (single tile) | ~700 MB | ✗ | Fine for single tiles, impractical at scale |
 | `writers.copc` (directory merge) | ~20–30 GB | ✗ | OOM on 11 GB WSL2 for 215-tile dataset |
-| `untwine` | Disk-bounded | ✓ | Not yet integrated; purpose-built for large COPC |
+| `untwine` | Disk-bounded | ✓ | ✅ Installed via conda-forge; used for Melbourne 2018 (353M pts) |
 | Raw LAZ + sidecar index | Minimal | ✓ | Research item — no file modification, proxy serves range requests |
 
-**Implication for [[pipeline-system]]:** The current pipeline produces COPC only for single-file input or small directory batches that fit in RAM. For the full Melbourne dataset (215 tiles), `--mode laz` is the only viable mode — producing a merged LAZ rather than COPC. COPC conversion of that LAZ must happen outside the main pipeline (via `untwine` or on a machine with adequate RAM).
+**Implication for [[pipeline-system]]:** The pipeline produces COPC only for single-file input or small batches that fit in RAM. For the Melbourne dataset (215 tiles), `--mode laz` produces a merged LAZ; COPC conversion runs separately via `untwine`. This is now the confirmed workflow — `untwine` is installed in the `lidar` conda env and has been validated on the full Melbourne dataset.
 
 **Urban vs. rural data compounds the issue.** Urban datasets (all Class 0) must run SMRF per tile before COPC can be built from ground-classified data. That is two full passes through the data — SMRF consumes RAM per tile and COPC construction consumes RAM for the merge. The per-tile sequential DTM strategy in [[pipeline-system]] addresses the SMRF constraint but leaves the COPC merge constraint unsolved.

@@ -14,19 +14,19 @@ import { setLazPerfPath } from "@giro3d/giro3d/sources/las/config.js";
 
 // ─── CRS registration ────────────────────────────────────────────────────────
 // Must be called before createInstance().
-// Hardcoded for EPSG:6343 — no epsg.io fetch needed.
+// Hardcoded for EPSG:28355 — no epsg.io fetch needed.
 // If your data changes CRS, update the proj4 string here.
 
 /**
- * Registers EPSG:6343 with proj4js.
+ * Registers EPSG:28355 with proj4js.
  * Call once at module load time, before any Instance is created.
  */
 export function registerCRS() {
-  // EPSG:6343 — NAD83(2011) / UTM zone 14N (USGS Central Texas COPC)
-  CoordinateSystem.register(
-    "EPSG:6343",
-    "+proj=utm +zone=14 +ellps=GRS80 +units=m +no_defs +type=crs",
-  );
+// EPSG:28355 — GDA94 / MGA zone 55 (City of Melbourne 2018 point cloud)
+CoordinateSystem.register(
+  "EPSG:28355",
+  "+proj=utm +zone=55 +south +ellps=GRS80 +towgs84=-16.237,23.854,-9.288,0,0,0,0 +units=m +no_defs +type=crs",
+);
 }
 
 // ─── WASM ────────────────────────────────────────────────────────────────────
