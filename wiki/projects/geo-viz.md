@@ -191,3 +191,11 @@ No tile server required — geotiff.js reads COG directly via range requests.
 2. **Raw LiDAR scatter** — load COPC returns via `@loaders.gl/las` for true density visualisation (dependency already in `package.json`)
 3. **Overpass query automation** — `scripts/` directory houses `sample_dsm.py`; add Overpass fetch script keyed to COG bbox
 4. **Multi-tile support** — extend `config.js` to support multiple COG URLs with a tile-selector UI
+
+---
+
+## Deployment
+
+Built and deployed via the shared `deploy.yaml` GitHub Actions workflow on every push to `main`. Output assembled to `dist/geo-viz/` under the Pages root.
+
+See [[giro3d-viewer]] and [[map-viewer]] for the other viewers in the same workflow.

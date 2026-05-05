@@ -10,6 +10,28 @@ Append-only. One entry per session. Most recent at top.
 
 ---
 
+## 2026-05-05 — Wiki audit: map-viewer and pmtiles pages added; CI docs; wiki location fixed
+
+**Action:** Ingest + Lint  
+**Summary:** Full repo audit revealed map-viewer project and PMTiles concept were undocumented. Wiki location bug fixed (all prior updates were going to `src/wiki/` instead of `geospatial-vision/wiki/`). .gitignore updated for `.claude/`.
+
+**New pages:**
+- `projects/map-viewer.md` — MapLibre GL v5 + PMTiles v4, ABS Mesh Blocks (vector) + Melbourne DTM COG (raster), category filters, zoom-to-CBD, GitHub Pages deployment
+- `concepts/pmtiles.md` — PMTiles format, browser protocol handler, go-pmtiles conversion, relation to COG and COPC
+
+**Updated pages:**
+- `index.md` — Added map-viewer row (projects) and pmtiles row (concepts)
+- `WIKI_SCHEMA.md` — Added map-viewer and pmtiles to directory listing
+- `projects/giro3d-viewer.md` — Added Deployment section with CI/WASM copy details
+- `projects/geo-viz.md` — Added Deployment section
+- `environment/conda-lidar-env.md`, `environment/python-install-rules.md`, `concepts/copc.md`, `concepts/smrf.md`, `projects/pipeline-system.md` — Synced from src/wiki to repo wiki (had diverged since Apr 29 commit)
+
+**Housekeeping:**
+- `.gitignore` updated: added `.claude/`
+- `wiki/` now synced: `src/wiki/` and `geospatial-vision/wiki/` are identical
+
+---
+
 ## 2026-05-05 — Pipeline: density threshold CLI arg, COPC streaming limitation, LAZ streaming
 
 **Action:** Update  

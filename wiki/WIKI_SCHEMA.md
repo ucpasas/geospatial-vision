@@ -31,14 +31,16 @@ wiki/geospatial-vision/
 │   ├── fastapi-spatial-api.md
 │   ├── dtm-postgis.md
 │   ├── giro3d-viewer.md
-│   └── geo-viz.md
+│   ├── geo-viz.md
+│   └── map-viewer.md
 ├── concepts/               ← reusable technical concepts
 │   ├── gdal.md
 │   ├── pdal.md
 │   ├── cog.md
 │   ├── copc.md
 │   ├── postgis.md
-│   └── smrf.md
+│   ├── smrf.md
+│   └── pmtiles.md
 ├── environment/            ← setup, install rules, env constraints
 │   ├── wsl2-setup.md
 │   ├── conda-lidar-env.md

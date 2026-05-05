@@ -167,3 +167,11 @@ No secrets in `config.js` — all URLs are public R2.dev or public Render endpoi
 4. **Potree comparison** — Same COPC data + classification filter, different renderer. Validates the modular architecture (`filters.js`, `ui.js`, `terrain.js` should be reusable unchanged).
 5. **Multi-tile support** — When batch pipeline processing is added, the viewer needs to handle multiple COPC files. `COPCSource` is single-URL — investigate Giro3D multi-source or tile-switching UI.
 6. **CRS migration to EPSG:7855** — When Australian data is added, update `viewer.js` registration and `index.html` panel label. Currently EPSG:6343 throughout.
+
+---
+
+## Deployment
+
+Built and deployed via the shared `deploy.yaml` GitHub Actions workflow on every push to `main`. Output assembled to `dist/giro3d-viewer/` under the Pages root. The workflow copies `laz-perf.wasm` from `node_modules/laz-perf/lib/` into `public/assets/wasm/` before building — required for in-browser LAZ decompression.
+
+See [[map-viewer]] and [[geo-viz]] for the other viewers in the same workflow.
