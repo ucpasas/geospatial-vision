@@ -69,6 +69,7 @@ jobs:
         run: |
           mkdir -p dist/giro3d-viewer
           mkdir -p dist/geo-viz
+          mkdir -p dist/map-viewer
           cp portfolio/index.html dist/index.html
           cp -r giro3d-viewer/dist/* dist/giro3d-viewer/
           cp -r geo-viz/dist/* dist/geo-viz/
