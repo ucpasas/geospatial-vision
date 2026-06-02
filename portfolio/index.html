@@ -226,6 +226,110 @@
 
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
+
+    /* ── Featured project ── */
+    .featured {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 32px 36px 28px;
+      margin-bottom: 64px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.15s;
+    }
+
+    .featured::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .featured:hover { background: #111820; }
+
+    .featured-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .featured-title {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 600;
+      color: #e8f4f0;
+      letter-spacing: -0.01em;
+    }
+
+    .featured-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .status-pub {
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 2px 7px;
+      border-radius: 2px;
+      background: color-mix(in srgb, var(--accent) 12%, transparent);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+    }
+
+    .featured-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+      font-weight: 300;
+      max-width: 680px;
+      margin-bottom: 20px;
+    }
+
+    .featured-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .featured-link-primary {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+
+    .featured-link-primary:hover { text-decoration: underline; }
+
+    .featured-link-secondary {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--dim);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+
+    .featured-link-secondary:hover { color: var(--muted); }
+
+    .featured-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -235,6 +339,40 @@
       <h1>Spatial tools,<br /><span>built from the ground up.</span></h1>
       <p class="tagline">A working portfolio of geospatial processing, APIs, and 3D visualisation — built in public.</p>
     </header>
+
+    <p class="section-label">Open Source</p>
+
+    <a class="featured" href="https://lazstream.stream" target="_blank">
+      <div class="featured-top">
+        <span class="featured-title">lazstream</span>
+        <div class="featured-meta">
+          <span class="status-pub">Published</span>
+        </div>
+      </div>
+      <p class="featured-desc">
+        Browser-native LAZ point cloud streaming — no preprocessing, no tile server, no conversion required.
+        Load any LAZ 1.2–1.4 file directly from S3, R2, or Azure Blob via HTTP range requests.
+        Chunk-seed instant overview, WebGPU atomicMin rendering, Eye-Dome Lighting, IDB caching.
+        Published as <code style="font-family:var(--mono);font-size:11px;color:var(--accent2)">@lazstream/core</code>
+        and <code style="font-family:var(--mono);font-size:11px;color:var(--accent2)">@lazstream/viewer</code> — renderer-agnostic engine
+        and one-liner WebGPU viewer.
+      </p>
+      <div class="featured-tags">
+        <span class="tag">WebGPU</span>
+        <span class="tag">LAZ / LiDAR</span>
+        <span class="tag">TypeScript</span>
+        <span class="tag">laz-perf WASM</span>
+        <span class="tag">Three.js</span>
+        <span class="tag">HTTP range requests</span>
+        <span class="tag">Apache-2.0</span>
+      </div>
+      <div class="featured-links">
+        <a class="featured-link-primary" href="https://lazstream.stream" target="_blank">lazstream.stream →</a>
+        <a class="featured-link-secondary" href="https://github.com/ucpasas/lazstream" target="_blank">github.com/ucpasas/lazstream</a>
+        <a class="featured-link-secondary" href="https://www.npmjs.com/package/@lazstream/core" target="_blank">npm: @lazstream/core</a>
+        <a class="featured-link-secondary" href="https://www.npmjs.com/package/@lazstream/viewer" target="_blank">npm: @lazstream/viewer</a>
+      </div>
+    </a>
 
     <p class="section-label">Projects</p>
 
